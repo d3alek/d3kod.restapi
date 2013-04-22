@@ -90,9 +90,10 @@ class RESTAPI(grok.View):
         for brain in queryResult:
             output.append(self._make_output(brain.getObject(),
                                                  detailsLevel))
+        if detailsLevel == 0:
+            output = {"site_contents":output}
 
-
-        if detailsLevel == 1: 
+        elif detailsLevel == 1: 
             queryDescription = self._convert_from_type(contentFilter['portal_type'])
             output = {queryDescription:output}
 
