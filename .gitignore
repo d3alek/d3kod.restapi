@@ -1,4 +1,9 @@
 *.py[cod]
+*.pyc
+*.pyo
+*.~
+.DS_Store
+.long_description.html
 
 # C extensions
 *.so
@@ -35,3 +40,4 @@ nosetests.xml
 .project
 .pydevproject
 
+  
