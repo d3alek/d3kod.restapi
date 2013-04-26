@@ -4,7 +4,7 @@ import json
 from zope.interface import implementer
 from zope.publisher.interfaces import IPublishTraverse
 from five import grok
-from plone.app.layout.navigation.interfaces import INavigationRoot
+from plone.app.layout.navigation.interfaces import Interface, INavigationRoot
 from plone import api
 from dehtml import dehtml
 
@@ -19,8 +19,9 @@ class RESTAPI(grok.View):
     """A view that exposes plone.api using JSON.
     """
 
-    grok.context(INavigationRoot)
+    grok.context(Interface)
     grok.name('rest')
+    
     #grok.require('cmf.ManagePortal')
 
     apimod = None
