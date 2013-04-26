@@ -20,7 +20,7 @@ class RESTAPI(grok.View):
     """
 
     grok.context(INavigationRoot)
-    grok.name('restapi')
+    grok.name('rest')
     #grok.require('cmf.ManagePortal')
 
     apimod = None

@@ -1,0 +1,15 @@
+===============
+Functional test
+===============
+
+
+HTTP GET on <siteroot>/@@rest should return a JSON response with the site
+contents
+	>>> from Products.Five.testbrowser import Browser
+	>>> self.browser = Browser()
+	>>> self.browser.addHeader('Content-type', 'application/json')
+	>>> self.browser.open(self.portal.absolute_url() + '/@@rest')
+	>>> self.browser.headers['Content-type']
+	'application/json' 
+
+Great.
