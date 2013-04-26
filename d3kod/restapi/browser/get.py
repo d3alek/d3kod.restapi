@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import json
+from collective.jsonify import get_item, get_children
 from zope.interface import implementer
-from zope.publisher.interfaces import IPublishTraverse
 from five import grok
 from plone.app.layout.navigation.interfaces import Interface, INavigationRoot
 from plone import api
-from dehtml import dehtml
+from d3kod.restapi.browser.restapi import RESTAPI, getObjectPath 
 
 import logging
 
@@ -14,49 +14,15 @@ logger = logging.getLogger('Plone')
 
 INVALID_QUERY_ERROR = "Invalid query"
 
-def getObjectPath(relPath):
-    suffpos = relPath.find('@@rest')
 
-    if suffpos == -1:
-        if relPath[-1] == '/':
-            return relPath[:-1]
-        return relPath
-
-    return relPath[:suffpos-1]
-
-@implementer(IPublishTraverse)
 class RESTAPI(grok.View):
     """A view that exposes plone.api using JSON.
     """
 
-    grok.context(Interface)
-    grok.name('rest')
+    grok.context(RESTAPI)
+    grok.name('get')
     
     #grok.require('cmf.ManagePortal')
-
-    apimod = None
-    apimet = None
-    contentFilter = dict()
-    error = None
-
-
-    def publishTraverse(self, request, name):
-        logger.info("publishTraverse " + request['URL']+ " " +
-                    json.dumps(name) + " " + json.dumps(self.error));
-        if self.error is not None:
-            return self
-        if self.contentFilter.get('portal_type', None) is None:
-            converted_name = self._convert_to_type(name)
-            if converted_name == None:
-                self.error = 'Invalid syntax: ' + name
-                return self
-            self.contentFilter['portal_type'] = converted_name 
-            return self
-        elif self.contentFilter.get('id', None) is None:
-            self.contentFilter['id'] = name
-            return self
-        self.error = INVALID_QUERY_ERROR 
-        return self
 
     def _convert_to_type(self, userInput):
         if not userInput.endswith('s'):
@@ -68,40 +34,19 @@ class RESTAPI(grok.View):
 
     def _convert_from_type(self, contentType):
         return contentType.lower()+'s'
-
-    def __init__(self, context, request):
-        logger.info("in init " + str(request.PATH_INFO))
-        self.context = context;
-        self.request = request;
-        if self.request.PATH_INFO[-1] != '/':
-            self.request.PATH_INFO += '/';
-
         
     def render(self):
-        """ 
-        Return an appropriate JSON response depending on the HTTP method used
+        """ Return an appropriate JSON response 
         """
 
-
-        self.request.response.setHeader("Content-type", "application/json")
-
-        if self.request.method == "GET":
-            logger.info('jumping to ' + self.request.PATH_INFO+'@@get')
-            get = self.context.restrictedTraverse(self.request.PATH_INFO+'@@get')
-            return get()
-        else: 
-            logger.info('request method is ' + self.request.method)
-            return self._make_json_error('Unsupported request')
-
+#        if self.request.method == "GET":
+            #self.context.restrictedTraverse('@@get')
 
         #logger.info("render " + json.dumps(self.contentFilter) + " " +
                     #json.dumps(str(type(self))))
 
         #contentFilter = dict(self.contentFilter)
         #self.contentFilter.clear()
-
-##        if len(contentFilter) == 0:
-            ##self.error = INVALID_QUERY_ERROR
 
         #if self.error is not None:
             #return self._make_json_error(self.error)
@@ -128,8 +73,22 @@ class RESTAPI(grok.View):
             #output = {queryDescription:output}
 
         #output = json.dumps(output)
+        logger.info('get path is ' + self.request.PATH_INFO + " " +
+                    getObjectPath(self.request.PATH_INFO));
 
-        #return output
+        catalog = api.portal.get_tool('portal_catalog')
+        path = getObjectPath(self.request.PATH_INFO);
+        if path.count('/') == 1:
+            logger.info('get objectAtPath is portal')
+            objectAtPath = api.portal.get()
+        else:
+            objectAtPath = catalog(path={'query':path, 'depth':0})
+            logger.info('get objectAtPath is ' + str(objectAtPath))
+            if len(objectAtPath) != 1:
+                return self._make_json_error('Object not found.')
+            objectAtPath = objectAtPath[0].getObject()
+
+        return get_item(objectAtPath)
 
     def _make_json_error(self, errorString): 
         return json.dumps({"type":"error", "message":errorString})
@@ -167,6 +126,7 @@ class RESTAPI(grok.View):
         fields['text'] = dehtml(obj.getText())
         d['fields'] = fields
         return d 
+
 
 
 

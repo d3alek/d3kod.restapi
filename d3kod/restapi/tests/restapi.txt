@@ -2,3 +2,13 @@
 Plone REST API Doctest
 ======================
 
+restapi.getObjectPath transforms a relative path including the REST API view
+names (@@rest, for example) into a Plone object path
+    >>> from d3kod.restapi.browser.restapi import getObjectPath
+    >>> getObjectPath('/Plone/front-page/@@rest/@@get')
+    '/Plone/front-page'
+    >>> getObjectPath('/Plone/front-page/@@rest/@@put/')
+    '/Plone/front-page'
+    >>> getObjectPath('/Plone/')
+    '/Plone'
+

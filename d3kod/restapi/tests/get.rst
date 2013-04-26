@@ -13,7 +13,7 @@ object description
     >>> import json
     >>> from plone import api
     >>> decodedContents = json.loads(self.browser.contents)
-    >>> decodedContents['_path'] == api.portal.get().absolute_url()
+    >>> decodedContents['_path'] == '/'+api.portal.get().virtual_url_path()
     True
 
 HTTP GET <page>/@@rest returns the object description of the
@@ -24,6 +24,7 @@ page with id=<page>
     >>> samplePagePath = samplePage.getPath()
     >>> from Products.Five.testbrowser import Browser
     >>> self.browser = Browser()
+    >>> self.browser.open(self.portal.absolute_url())
     >>> self.browser.open(samplePagePath + '/@@rest')
     >>> import json
     >>> decodedContents = json.loads(self.browser.contents)
@@ -34,11 +35,12 @@ HTTP GET <object>@@rest/list lists the contents of an object (surprise!) if it i
 container. If not, returns an error
     >>> from plone import api 
     >>> catalog = api.portal.get_tool('portal_catalog')
-    >>> sampleFolder = catalog(portal_type='Folder')[0]
+    >>> sampleFolder = catalog(portal_type='Folder')[1]
     >>> sampleFolderPath = sampleFolder.getPath()
-    >>> sampleFolderChild = catalog(path={'query':sampleFolderPath(), 'depth':1})[0]
+    >>> sampleFolderChild = catalog(path={'query':sampleFolderPath, 'depth':1})[0]
     >>> from Products.Five.testbrowser import Browser
     >>> self.browser = Browser()
+    >>> self.browser.open(self.portal.absolute_url())
     >>> self.browser.open(sampleFolderPath + '/@@rest/list')
     >>> import json
     >>> decodedContents = json.loads(self.browser.contents)
