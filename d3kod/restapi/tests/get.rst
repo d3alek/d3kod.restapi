@@ -2,7 +2,6 @@
 Functional doctest of GET responses
 ===================================
 
-
 HTTP GET @@rest returns a JSON response with the root site
 object description
     >>> from Products.Five.testbrowser import Browser
