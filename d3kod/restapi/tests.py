@@ -53,7 +53,7 @@ def test_suite():
         #    test_class=TestCase),
 
         ztc.FunctionalDocFileSuite(
-            'tests/browser.txt', package='d3kod.restapi',
+            'tests/get.rst', package='d3kod.restapi',
             optionflags=optionflags,
             test_class=ptc.FunctionalTestCase),
 
